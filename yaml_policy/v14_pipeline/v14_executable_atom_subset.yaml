@@ -1,0 +1,49 @@
+version: v14_executable_atom_subset
+source_registry: universal_pruning_typed_atom_registry_v0_5_light.yaml
+
+goal:
+  - fixed_seed_selection: 0021_v12_native_balanced_rq02
+  - optimize_post_selection_token_processing
+  - target_full_raw: "> 1702.0985"
+
+process_tokens_atoms:
+  identity_token_processing:
+    derived_from:
+      - training_free_control
+    train_free: true
+    changes_token_count: false
+    output_shape: [B, K, D]
+
+  score_rescale_selected_features:
+    derived_from:
+      - weighted_score_fusion
+      - token_reorganization
+    train_free: true
+    changes_token_count: false
+    output_shape: [B, K, D]
+
+  similarity_weighted_residual_merge:
+    derived_from:
+      - bipartite_soft_matching_merge
+      - pairwise_token_similarity
+    source_methods:
+      - ToMe
+    train_free: true
+    changes_token_count: false
+    output_shape: [B, K, D]
+
+  semantic_gated_residual_merge:
+    derived_from:
+      - instruction_guided_visual_relevance
+      - bipartite_soft_matching_merge
+    train_free: true
+    changes_token_count: false
+    output_shape: [B, K, D]
+
+  spatial_local_residual_merge:
+    derived_from:
+      - spatial_coverage_preservation
+      - token_reorganization
+    train_free: true
+    changes_token_count: false
+    output_shape: [B, K, D]
