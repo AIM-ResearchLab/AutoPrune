@@ -1,0 +1,48 @@
+policy:
+  name: v17_cdpruner_anchor_residual_s005
+  token_budget:
+    mode: fixed
+    keep: 32
+  token_source:
+    stream: vision_tokens
+    layer: post_projector
+  anchor_provider:
+    type: external_policy
+    adapter: cdpruner_v16
+    output: index_mask
+    freeze: true
+  scoring:
+    features:
+    - spatial_centrality
+    - redundancy
+    weights:
+      spatial_centrality: 0.05
+      redundancy: 0.03
+  anchor_selection:
+    operator: external_mask
+    diversity: none
+    protect: []
+  merge_assignment:
+    operator: nearest_anchor
+    metric: cosine
+    max_group_size: 999
+  merge_operator:
+    type: anchor_weighted_residual
+    residual_scale: 0.005
+  residual:
+    enabled: true
+    type: mean_residual
+    inject_to: anchors
+    scale: 0.005
+  constraints:
+    preserve_budget: true
+    no_shape_change: true
+    deterministic: true
+    fallback_to_selection: true
+policy_name: v18_merge_anchor_residual_s0050
+name: v18_merge_anchor_residual_s0050
+meta:
+  method: v18_embedding_refinement
+  embedding_refiner: anchor_residual
+  residual_scale: 0.005
+  base_source: v17_residual_s005

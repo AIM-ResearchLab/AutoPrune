@@ -1,0 +1,44 @@
+policy:
+  name: v17_cdpruner_anchor_initial
+  token_budget:
+    mode: fixed
+    keep: 32
+  token_source:
+    stream: vision_tokens
+    layer: post_projector
+  anchor_provider:
+    type: external_policy
+    adapter: cdpruner_v16
+    policy_path: /data/lz/openevolve_pruner/CDPruner/openevolve/runs/v16_cdpruner_seed_full_perception_K32_fullmme/best/best_policy.yaml
+    output: index_mask
+    freeze: true
+  scoring:
+    features: []
+    weights: {}
+  anchor_selection:
+    operator: external_mask
+    diversity: none
+    min_spatial_coverage: 0.0
+    protect: []
+  merge_assignment:
+    operator: nearest_anchor
+    metric: cosine
+    max_group_size: 999
+  merge_operator:
+    type: anchor_only
+    residual_scale: 0.0
+  residual:
+    enabled: false
+    type: none
+    inject_to: anchors
+    scale: 0.0
+  constraints:
+    preserve_budget: true
+    no_shape_change: true
+    deterministic: true
+    fallback_to_selection: true
+policy_name: v18_merge_initial_anchor_only
+name: v18_merge_initial_anchor_only
+meta:
+  method: v18_initial_no_embedding_refinement
+  expected_initial_perception: 1382.8248299319728
