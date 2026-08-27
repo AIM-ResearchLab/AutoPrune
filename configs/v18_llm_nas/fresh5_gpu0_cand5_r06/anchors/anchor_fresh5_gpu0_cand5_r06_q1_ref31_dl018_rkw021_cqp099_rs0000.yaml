@@ -1,0 +1,98 @@
+policy_name: anchor_fresh5_gpu0_cand5_r06_q1_ref31_dl018_rkw021_cqp099_rs0000
+name: anchor_fresh5_gpu0_cand5_r06_q1_ref31_dl018_rkw021_cqp099_rs0000
+keep_tokens: 32
+pipeline:
+- op: compute_score
+  name: native_teacher_mask_prior
+  params:
+    keep_tokens: 32
+  output: reference_score
+- op: compute_score
+  name: instruction_guided_visual_relevance
+  output: semantic_score
+- op: compute_score
+  name: attention_proxy_saliency
+  output: attn_score
+- op: compute_score
+  name: spatial_centrality_prior
+  params:
+    center_bias: 0.75
+    transform: minmax
+  output: spatial_score
+- op: compute_score
+  name: redundancy_density_penalty
+  params:
+    transform: minmax
+  output: redundancy_score
+- op: compute_score
+  name: local_contrast_saliency
+  output: contrast_score
+- op: compute_kernel
+  name: pairwise_cosine_kernel
+  output: sim_kernel
+- op: product_fuse_score
+  name: weighted_product_fusion
+  inputs:
+    scores:
+      semantic: semantic_score
+      attn: attn_score
+      spatial: spatial_score
+      redundancy: redundancy_score
+      contrast: contrast_score
+  params:
+    weights:
+      semantic: 0.28
+      attn: 0.1
+      spatial: 0.16
+      redundancy: 0.07
+      contrast: 0.06
+  output: quality_score
+- op: select
+  name: native_reference_residual_exchange_selector
+  inputs:
+    quality: quality_score
+    reference: reference_score
+    kernel: sim_kernel
+  params:
+    replace_quota: 1
+    min_reference_keep: 31
+    diversity_lambda: 0.18
+    reference_keep_weight: 0.21
+    candidate_quality_power: 0.99
+    sort_selected: true
+  output: selected
+meta:
+  method: v18_llm_nas_anchor
+  objective: full_mme_perception_only
+  base_source: v16_generation0_clean_cdpruner_k32_baseline
+  clean_baseline_perception: 1382.8248299319728
+  target_v14a_perception: 1404.9353741496598
+  iteration: 8
+  mutation_family: position_recovery_no_process
+  mutation_detail:
+    selector: residual
+    q: 2
+    min_ref: 30
+    div: 0.12
+    refw: 0.22
+    power: 1.0
+    process: none
+  aux:
+    center_bias: 0.75
+    weights:
+      semantic: 0.28
+      attn: 0.1
+      spatial: 0.16
+      redundancy: 0.07
+      contrast: 0.06
+  expected_perception: 1382.8248299319728
+  expected_cognition: 304.2857142857143
+  expected_selected_tokens_avg: 32.0
+  candidate_name: fresh5_gpu0_cand5_r06_q1_ref31_dl018_rkw021_cqp099_rs0000
+  replace_quota: 1
+  min_reference_keep: 31
+  diversity_lambda: 0.18
+  reference_keep_weight: 0.21
+  candidate_quality_power: 0.99
+  baseline: clean_cdpruner_k32_1382
+policy_fp: 06afc1577b2155a6
